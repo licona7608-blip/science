@@ -1,0 +1,2041 @@
+<!DOCTYPE html>
+<html lang="ko"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIwMjQ0NjI1OTc4MDk2MDM4ODI4MiIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjXzE1YWFjODQ4MWQ5ZjAzZWNfaW5kZXguaHRtbC01MzgifSwiZXhwIjoxNzkzODU2MzQwLCJpYXQiOjE3OTM4NTI3NDAsImFsZyI6IlJTMjU2In0.SQoXBR-nIhBBNQ1osJMrPS_3FqxpFzm3jRRd5YEz4PN7s5Y8CXEXYsEHsz9Fjmi5qJmA-xl-svcIH1WD0sa5V0ogvGNitlNaaUJx0Mv98f8gzeOLf7nxgJc86lSy6lTcASkvOTgtcFFOBpVbPnz014Hh1EKlH-FLNjRXRVzubYe9wCjNSE7uMfBhCH2JoROIaGo1f6i-kAUZsVJDtM4PCEPqPXiwuVz0jA_UXxOi8tQNmTFnG2i3Yd_0HzhLEvCEz3rSGdUP1ZU-4Yff0MPOcfa2PEealmAdU-qRCRYdMXMceYTPAEta1D5uzOkECf42vLGFCvGlbwWODQjdZrGBEA","c_15aac8481d9f03ec_index.html-538")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function() {
+  function normalizeSlug(str) {
+    try {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^p{L}p{N}s_-]/gu, '')
+        .replace(/s+/g, '-');
+    } catch (e) {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9s_-]/g, '')
+        .replace(/s+/g, '-');
+    }
+  }
+
+  function findTargetElement(hash) {
+    if (!hash || hash === '#') {
+      return null;
+    }
+    const rawId = hash.startsWith('#') ? hash.slice(1) : hash;
+    let decodedId = rawId;
+    try {
+      decodedId = decodeURIComponent(rawId);
+    } catch (e) {
+      // Ignore URI malformed errors.
+    }
+
+    // 1. Direct ID match (raw and decoded).
+    let target = document.getElementById(rawId) || document.getElementById(decodedId);
+    if (target) {
+      return target;
+    }
+
+    // 2. Name attribute match (<a name="...">).
+    try {
+      if (typeof CSS !== 'undefined' && CSS.escape) {
+        target =
+          document.querySelector('[name="' + CSS.escape(rawId) + '"]') ||
+          document.querySelector('[name="' + CSS.escape(decodedId) + '"]');
+      } else {
+        const namedElements = document.getElementsByName(rawId);
+        if (namedElements && namedElements.length > 0) {
+          return namedElements[0];
+        }
+      }
+    } catch (e) {
+      // Ignore querySelector syntax errors.
+    }
+    if (target) {
+      return target;
+    }
+
+    // 3. Match heading text by slug (for Markdown TOCs where headings lack explicit IDs).
+    const targetSlug = normalizeSlug(decodedId);
+    if (targetSlug) {
+      for (const heading of document.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+        if (normalizeSlug(heading.textContent || '') === targetSlug) {
+          return heading;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  document.addEventListener('click', function(event) {
+    const target = event.target;
+    const anchor = target && typeof target.closest === 'function' ? target.closest('a') : null;
+    if (!anchor) {
+      return;
+    }
+
+    const href = anchor.getAttribute('href');
+    if (
+      !href ||
+      href.trim().toLowerCase().startsWith('javascript:') ||
+      anchor.hasAttribute('download')
+    ) {
+      return;
+    }
+
+    // Check if the link is an in-page hash / anchor link.
+    if (href.startsWith('#')) {
+      event.preventDefault();
+      const targetElement = findTargetElement(href);
+      if (targetElement) {
+        targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+      return;
+    }
+
+    // Check if the URL has the same origin/pathname but with a hash.
+    try {
+      const url = new URL(anchor.href, window.location.href);
+      if (
+        url.hash &&
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname
+      ) {
+        event.preventDefault();
+        const targetElement = findTargetElement(url.hash);
+        if (targetElement) {
+          targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+        return;
+      }
+    } catch (e) {
+      // Fall through if URL parsing fails.
+    }
+
+    // For all external or full navigation links, prevent iframe-level navigation
+    // (which breaks in AGSA WebView or sandboxed iframes) and ensure they open
+    // safely in a new tab/window.
+    if (anchor.target !== '_blank') {
+      event.preventDefault();
+      window.open(anchor.href, '_blank', 'noopener,noreferrer');
+    }
+  }, {capture: true});
+})();</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4학년 과학 - 여러 가지 기체 놀이 (실시간 퀴즈 &amp; 경매 시스템)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Jua&amp;family=Noto+Sans+KR:wght@400;600;700;900&amp;display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js" crossorigin="anonymous"></script>
+  
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .font-jua { font-family: 'Jua', sans-serif; }
+    
+    @keyframes floatGentle {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(2deg); }
+    }
+    .animate-float-gentle {
+      animation: floatGentle 3s ease-in-out infinite;
+    }
+
+    @keyframes goldGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); border-color: rgba(245, 158, 11, 0.6); }
+      50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.8); border-color: rgba(251, 191, 36, 1); }
+    }
+    .gold-shimmer {
+      animation: goldGlow 2s infinite;
+    }
+  </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0px}.inset-x-0{left:0px;right:0px}.bottom-0{bottom:0px}.left-1\/2{left:50%}.right-0{right:0px}.top-0{top:0px}.top-16{top:4rem}.top-7{top:1.75rem}.top-8{top:2rem}.z-10{z-index:10}.z-20{z-index:20}.z-40{z-index:40}.z-50{z-index:50}.z-\[100\]{z-index:100}.z-\[60\]{z-index:60}.z-\[70\]{z-index:70}.z-\[80\]{z-index:80}.mx-auto{margin-left:auto;margin-right:auto}.my-3{margin-top:0.75rem;margin-bottom:0.75rem}.my-4{margin-top:1rem;margin-bottom:1rem}.-mt-1{margin-top:-0.25rem}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.ml-0\.5{margin-left:0.125rem}.ml-2{margin-left:0.5rem}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.mt-2{margin-top:0.5rem}.mt-3{margin-top:0.75rem}.mt-4{margin-top:1rem}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-10{height:2.5rem}.h-16{height:4rem}.h-2{height:0.5rem}.h-20{height:5rem}.h-24{height:6rem}.h-64{height:16rem}.h-8{height:2rem}.h-\[200px\]{height:200px}.max-h-\[95vh\]{max-height:95vh}.min-h-\[120px\]{min-height:120px}.min-h-\[140px\]{min-height:140px}.min-h-\[340px\]{min-height:340px}.min-h-screen{min-height:100vh}.w-1{width:0.25rem}.w-10{width:2.5rem}.w-16{width:4rem}.w-2{width:0.5rem}.w-20{width:5rem}.w-24{width:6rem}.w-48{width:12rem}.w-8{width:2rem}.w-full{width:100%}.min-w-\[140px\]{min-width:140px}.max-w-5xl{max-width:64rem}.max-w-7xl{max-width:80rem}.max-w-\[180px\]{max-width:180px}.max-w-\[90px\]{max-width:90px}.max-w-lg{max-width:32rem}.max-w-sm{max-width:24rem}.flex-1{flex:1 1 0%}.-translate-x-1\/2{--tw-translate-x:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes bounce{0%, 100%{transform:translateY(-25%);animation-timing-function:cubic-bezier(0.8,0,1,1)}50%{transform:none;animation-timing-function:cubic-bezier(0,0,0.2,1)}}.animate-bounce{animation:bounce 1s infinite}@keyframes ping{75%, 100%{transform:scale(2);opacity:0}}.animate-ping{animation:ping 1s cubic-bezier(0, 0, 0.2, 1) infinite}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}.cursor-pointer{cursor:pointer}.appearance-none{-webkit-appearance:none;appearance:none}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-col-reverse{flex-direction:column-reverse}.flex-wrap{flex-wrap:wrap}.content-start{align-content:flex-start}.items-center{align-items:center}.items-baseline{align-items:baseline}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-2\.5{gap:0.625rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-5{gap:1.25rem}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.overflow-x-hidden{overflow-x:hidden}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-\[22px\]{border-radius:22px}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.rounded-b-3xl{border-bottom-right-radius:1.5rem;border-bottom-left-radius:1.5rem}.border{border-width:1px}.border-2{border-width:2px}.border-4{border-width:4px}.border-y-2{border-top-width:2px;border-bottom-width:2px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-t-4{border-top-width:4px}.border-dashed{border-style:dashed}.border-amber-200{--tw-border-opacity:1;border-color:rgb(253 230 138 / var(--tw-border-opacity, 1))}.border-amber-300{--tw-border-opacity:1;border-color:rgb(252 211 77 / var(--tw-border-opacity, 1))}.border-amber-400{--tw-border-opacity:1;border-color:rgb(251 191 36 / var(--tw-border-opacity, 1))}.border-amber-400\/50{border-color:rgb(251 191 36 / 0.5)}.border-amber-500\/30{border-color:rgb(245 158 11 / 0.3)}.border-emerald-400\/80{border-color:rgb(52 211 153 / 0.8)}.border-indigo-200{--tw-border-opacity:1;border-color:rgb(199 210 254 / var(--tw-border-opacity, 1))}.border-indigo-400\/30{border-color:rgb(129 140 248 / 0.3)}.border-indigo-500{--tw-border-opacity:1;border-color:rgb(99 102 241 / var(--tw-border-opacity, 1))}.border-indigo-500\/30{border-color:rgb(99 102 241 / 0.3)}.border-indigo-500\/40{border-color:rgb(99 102 241 / 0.4)}.border-indigo-500\/50{border-color:rgb(99 102 241 / 0.5)}.border-indigo-600\/40{border-color:rgb(79 70 229 / 0.4)}.border-indigo-900{--tw-border-opacity:1;border-color:rgb(49 46 129 / var(--tw-border-opacity, 1))}.border-rose-100{--tw-border-opacity:1;border-color:rgb(255 228 230 / var(--tw-border-opacity, 1))}.border-rose-500\/40{border-color:rgb(244 63 94 / 0.4)}.border-sky-200{--tw-border-opacity:1;border-color:rgb(186 230 253 / var(--tw-border-opacity, 1))}.border-sky-700{--tw-border-opacity:1;border-color:rgb(3 105 161 / var(--tw-border-opacity, 1))}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249 / var(--tw-border-opacity, 1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240 / var(--tw-border-opacity, 1))}.border-slate-300{--tw-border-opacity:1;border-color:rgb(203 213 225 / var(--tw-border-opacity, 1))}.border-slate-400{--tw-border-opacity:1;border-color:rgb(148 163 184 / var(--tw-border-opacity, 1))}.border-slate-600{--tw-border-opacity:1;border-color:rgb(71 85 105 / var(--tw-border-opacity, 1))}.border-slate-700{--tw-border-opacity:1;border-color:rgb(51 65 85 / var(--tw-border-opacity, 1))}.border-slate-800{--tw-border-opacity:1;border-color:rgb(30 41 59 / var(--tw-border-opacity, 1))}.bg-amber-500{--tw-bg-opacity:1;background-color:rgb(245 158 11 / var(--tw-bg-opacity, 1))}.bg-amber-500\/10{background-color:rgb(245 158 11 / 0.1)}.bg-amber-700{--tw-bg-opacity:1;background-color:rgb(180 83 9 / var(--tw-bg-opacity, 1))}.bg-amber-800{--tw-bg-opacity:1;background-color:rgb(146 64 14 / var(--tw-bg-opacity, 1))}.bg-emerald-100\/60{background-color:rgb(209 250 229 / 0.6)}.bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.bg-indigo-100{--tw-bg-opacity:1;background-color:rgb(224 231 255 / var(--tw-bg-opacity, 1))}.bg-indigo-50{--tw-bg-opacity:1;background-color:rgb(238 242 255 / var(--tw-bg-opacity, 1))}.bg-indigo-500\/20{background-color:rgb(99 102 241 / 0.2)}.bg-indigo-600{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity, 1))}.bg-indigo-900\/40{background-color:rgb(49 46 129 / 0.4)}.bg-rose-500{--tw-bg-opacity:1;background-color:rgb(244 63 94 / var(--tw-bg-opacity, 1))}.bg-rose-500\/20{background-color:rgb(244 63 94 / 0.2)}.bg-rose-600{--tw-bg-opacity:1;background-color:rgb(225 29 72 / var(--tw-bg-opacity, 1))}.bg-sky-100\/40{background-color:rgb(224 242 254 / 0.4)}.bg-sky-50{--tw-bg-opacity:1;background-color:rgb(240 249 255 / var(--tw-bg-opacity, 1))}.bg-sky-50\/60{background-color:rgb(240 249 255 / 0.6)}.bg-sky-900\/50{background-color:rgb(12 74 110 / 0.5)}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.bg-slate-200{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.bg-slate-700{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.bg-slate-800{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.bg-slate-900\/50{background-color:rgb(15 23 42 / 0.5)}.bg-slate-900\/95{background-color:rgb(15 23 42 / 0.95)}.bg-slate-950{--tw-bg-opacity:1;background-color:rgb(2 6 23 / var(--tw-bg-opacity, 1))}.bg-slate-950\/80{background-color:rgb(2 6 23 / 0.8)}.bg-slate-950\/90{background-color:rgb(2 6 23 / 0.9)}.bg-slate-950\/95{background-color:rgb(2 6 23 / 0.95)}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-white\/10{background-color:rgb(255 255 255 / 0.1)}.bg-white\/60{background-color:rgb(255 255 255 / 0.6)}.bg-white\/90{background-color:rgb(255 255 255 / 0.9)}.bg-gradient-to-b{background-image:linear-gradient(to bottom, var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.bg-gradient-to-t{background-image:linear-gradient(to top, var(--tw-gradient-stops))}.bg-gradient-to-tr{background-image:linear-gradient(to top right, var(--tw-gradient-stops))}.from-amber-400{--tw-gradient-from:#fbbf24 var(--tw-gradient-from-position);--tw-gradient-to:rgb(251 191 36 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-amber-400\/30{--tw-gradient-from:rgb(251 191 36 / 0.3) var(--tw-gradient-from-position);--tw-gradient-to:rgb(251 191 36 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-amber-500{--tw-gradient-from:#f59e0b var(--tw-gradient-from-position);--tw-gradient-to:rgb(245 158 11 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-amber-500\/10{--tw-gradient-from:rgb(245 158 11 / 0.1) var(--tw-gradient-from-position);--tw-gradient-to:rgb(245 158 11 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-amber-500\/20{--tw-gradient-from:rgb(245 158 11 / 0.2) var(--tw-gradient-from-position);--tw-gradient-to:rgb(245 158 11 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-emerald-600{--tw-gradient-from:#059669 var(--tw-gradient-from-position);--tw-gradient-to:rgb(5 150 105 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-indigo-600{--tw-gradient-from:#4f46e5 var(--tw-gradient-from-position);--tw-gradient-to:rgb(79 70 229 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-purple-600{--tw-gradient-from:#9333ea var(--tw-gradient-from-position);--tw-gradient-to:rgb(147 51 234 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-sky-400{--tw-gradient-from:#38bdf8 var(--tw-gradient-from-position);--tw-gradient-to:rgb(56 189 248 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-sky-50{--tw-gradient-from:#f0f9ff var(--tw-gradient-from-position);--tw-gradient-to:rgb(240 249 255 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-sky-600{--tw-gradient-from:#0284c7 var(--tw-gradient-from-position);--tw-gradient-to:rgb(2 132 199 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.via-indigo-500{--tw-gradient-to:rgb(99 102 241 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #6366f1 var(--tw-gradient-via-position), var(--tw-gradient-to)}.via-slate-50{--tw-gradient-to:rgb(248 250 252 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #f8fafc var(--tw-gradient-via-position), var(--tw-gradient-to)}.via-yellow-500\/15{--tw-gradient-to:rgb(234 179 8 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), rgb(234 179 8 / 0.15) var(--tw-gradient-via-position), var(--tw-gradient-to)}.to-amber-200\/20{--tw-gradient-to:rgb(253 230 138 / 0.2) var(--tw-gradient-to-position)}.to-amber-500\/10{--tw-gradient-to:rgb(245 158 11 / 0.1) var(--tw-gradient-to-position)}.to-blue-600{--tw-gradient-to:#2563eb var(--tw-gradient-to-position)}.to-indigo-50{--tw-gradient-to:#eef2ff var(--tw-gradient-to-position)}.to-orange-500{--tw-gradient-to:#f97316 var(--tw-gradient-to-position)}.to-pink-600{--tw-gradient-to:#db2777 var(--tw-gradient-to-position)}.to-purple-500{--tw-gradient-to:#a855f7 var(--tw-gradient-to-position)}.to-purple-600{--tw-gradient-to:#9333ea var(--tw-gradient-to-position)}.to-teal-600{--tw-gradient-to:#0d9488 var(--tw-gradient-to-position)}.to-yellow-500\/20{--tw-gradient-to:rgb(234 179 8 / 0.2) var(--tw-gradient-to-position)}.p-1{padding:0.25rem}.p-2{padding:0.5rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-8{padding:2rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.px-1\.5{padding-left:0.375rem;padding-right:0.375rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.pb-1{padding-bottom:0.25rem}.pb-2{padding-bottom:0.5rem}.pb-3{padding-bottom:0.75rem}.pt-1{padding-top:0.25rem}.pt-2{padding-top:0.5rem}.pt-4{padding-top:1rem}.text-center{text-align:center}.text-right{text-align:right}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-5xl{font-size:3rem;line-height:1}.text-6xl{font-size:3.75rem;line-height:1}.text-7xl{font-size:4.5rem;line-height:1}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-\[9px\]{font-size:9px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-medium{font-weight:500}.leading-relaxed{line-height:1.625}.leading-tight{line-height:1.25}.tracking-wide{letter-spacing:0.025em}.tracking-widest{letter-spacing:0.1em}.text-amber-200{--tw-text-opacity:1;color:rgb(253 230 138 / var(--tw-text-opacity, 1))}.text-amber-300{--tw-text-opacity:1;color:rgb(252 211 77 / var(--tw-text-opacity, 1))}.text-amber-400{--tw-text-opacity:1;color:rgb(251 191 36 / var(--tw-text-opacity, 1))}.text-amber-500{--tw-text-opacity:1;color:rgb(245 158 11 / var(--tw-text-opacity, 1))}.text-amber-600{--tw-text-opacity:1;color:rgb(217 119 6 / var(--tw-text-opacity, 1))}.text-emerald-400{--tw-text-opacity:1;color:rgb(52 211 153 / var(--tw-text-opacity, 1))}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87 / var(--tw-text-opacity, 1))}.text-indigo-300{--tw-text-opacity:1;color:rgb(165 180 252 / var(--tw-text-opacity, 1))}.text-indigo-500{--tw-text-opacity:1;color:rgb(99 102 241 / var(--tw-text-opacity, 1))}.text-indigo-600{--tw-text-opacity:1;color:rgb(79 70 229 / var(--tw-text-opacity, 1))}.text-indigo-700{--tw-text-opacity:1;color:rgb(67 56 202 / var(--tw-text-opacity, 1))}.text-indigo-900{--tw-text-opacity:1;color:rgb(49 46 129 / var(--tw-text-opacity, 1))}.text-indigo-950{--tw-text-opacity:1;color:rgb(30 27 75 / var(--tw-text-opacity, 1))}.text-rose-400{--tw-text-opacity:1;color:rgb(251 113 133 / var(--tw-text-opacity, 1))}.text-rose-600{--tw-text-opacity:1;color:rgb(225 29 72 / var(--tw-text-opacity, 1))}.text-sky-300{--tw-text-opacity:1;color:rgb(125 211 252 / var(--tw-text-opacity, 1))}.text-sky-400{--tw-text-opacity:1;color:rgb(56 189 248 / var(--tw-text-opacity, 1))}.text-sky-800{--tw-text-opacity:1;color:rgb(7 89 133 / var(--tw-text-opacity, 1))}.text-sky-950{--tw-text-opacity:1;color:rgb(8 47 73 / var(--tw-text-opacity, 1))}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.text-slate-900{--tw-text-opacity:1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.accent-indigo-600{accent-color:#4f46e5}.opacity-10{opacity:0.1}.shadow{--tw-shadow:0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_15px_rgba\(245\2c 158\2c 11\2c 0\.5\)\]{--tw-shadow:0 0 15px rgba(245,158,11,0.5);--tw-shadow-colored:0 0 15px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_15px_rgba\(251\2c 191\2c 36\2c 0\.3\)\]{--tw-shadow:0 0 15px rgba(251,191,36,0.3);--tw-shadow-colored:0 0 15px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_40px_rgba\(251\2c 191\2c 36\2c 0\.6\)\]{--tw-shadow:0 0 40px rgba(251,191,36,0.6);--tw-shadow-colored:0 0 40px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_8px_\#10b981\]{--tw-shadow:0 0 8px #10b981;--tw-shadow-colored:0 0 8px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-inner{--tw-shadow:inset 0 2px 4px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:inset 0 2px 4px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_8px_\#f59e0b\]{--tw-shadow:0 0 8px #f59e0b;--tw-shadow-colored:0 0 8px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.ring-2{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.ring-indigo-200{--tw-ring-opacity:1;--tw-ring-color:rgb(199 210 254 / var(--tw-ring-opacity, 1))}.drop-shadow-lg{--tw-drop-shadow:drop-shadow(0 10px 8px rgb(0 0 0 / 0.04)) drop-shadow(0 4px 3px rgb(0 0 0 / 0.1));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow-xl{--tw-drop-shadow:drop-shadow(0 20px 13px rgb(0 0 0 / 0.03)) drop-shadow(0 8px 5px rgb(0 0 0 / 0.08));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur-\[1px\]{--tw-backdrop-blur:blur(1px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.duration-700{transition-duration:700ms}.hover\:scale-105:hover{--tw-scale-x:1.05;--tw-scale-y:1.05;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:bg-amber-800:hover{--tw-bg-opacity:1;background-color:rgb(146 64 14 / var(--tw-bg-opacity, 1))}.hover\:bg-indigo-700:hover{--tw-bg-opacity:1;background-color:rgb(67 56 202 / var(--tw-bg-opacity, 1))}.hover\:bg-rose-500:hover{--tw-bg-opacity:1;background-color:rgb(244 63 94 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-300:hover{--tw-bg-opacity:1;background-color:rgb(203 213 225 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-50:hover{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-600:hover{--tw-bg-opacity:1;background-color:rgb(71 85 105 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-700:hover{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-800:hover{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.hover\:bg-white\/20:hover{background-color:rgb(255 255 255 / 0.2)}.hover\:from-amber-400:hover{--tw-gradient-from:#fbbf24 var(--tw-gradient-from-position);--tw-gradient-to:rgb(251 191 36 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:from-indigo-500:hover{--tw-gradient-from:#6366f1 var(--tw-gradient-from-position);--tw-gradient-to:rgb(99 102 241 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:from-purple-500:hover{--tw-gradient-from:#a855f7 var(--tw-gradient-from-position);--tw-gradient-to:rgb(168 85 247 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:from-sky-500:hover{--tw-gradient-from:#0ea5e9 var(--tw-gradient-from-position);--tw-gradient-to:rgb(14 165 233 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:to-orange-400:hover{--tw-gradient-to:#fb923c var(--tw-gradient-to-position)}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.focus\:border-emerald-500:focus{--tw-border-opacity:1;border-color:rgb(16 185 129 / var(--tw-border-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.active\:scale-95:active{--tw-scale-x:.95;--tw-scale-y:.95;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.disabled\:opacity-50:disabled{opacity:0.5}@media (min-width: 640px){.sm\:flex-row{flex-direction:row}.sm\:p-5{padding:1.25rem}.sm\:text-left{text-align:left}.sm\:text-base{font-size:1rem;line-height:1.5rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}}@media (min-width: 768px){.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}}@media (min-width: 1024px){.lg\:col-span-5{grid-column:span 5 / span 5}.lg\:col-span-7{grid-column:span 7 / span 7}.lg\:grid-cols-12{grid-template-columns:repeat(12, minmax(0, 1fr))}}</style></head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+  <!-- ========================================== -->
+  <!-- [모듈 1] 상단 글로벌 헤더 & 라우팅 -->
+  <!-- ========================================== -->
+  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-2.5 shadow-xl">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-400 via-indigo-500 to-purple-500 text-white flex items-center justify-center shadow-md text-xl">
+          <i class="fa-solid fa-wind"></i>
+        </span>
+        <div>
+          <span class="text-[10px] font-black text-sky-300 bg-sky-900/50 px-2 py-0.5 rounded-full border border-sky-700">초등 4학년 2학기 과학 · 여러 가지 기체</span>
+          <h1 class="text-base sm:text-lg font-black text-white leading-tight font-jua tracking-wide">기체로 재미있는 놀이하기 (부력 &amp; 헬륨 풍선)</h1>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2.5">
+        <div class="bg-slate-800 p-1 rounded-2xl flex items-center border border-slate-700 shadow-inner">
+          <button id="navTabMain" class="px-4 py-1.5 rounded-xl font-jua text-sm bg-indigo-600 text-white shadow transition">본학습</button>
+          <button id="navTabAuction" class="px-4 py-1.5 rounded-xl font-jua text-sm text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+            <span>⚖️ 토큰 경매장</span>
+            <span id="auctionLiveBadge" class="hidden px-1.5 py-0.2 bg-rose-500 text-white text-[9px] font-black rounded-full animate-pulse tracking-widest">LIVE</span>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-2xl shadow-inner">
+          <span class="text-amber-400 text-sm animate-bounce">🪙</span>
+          <span class="text-xs font-bold text-amber-200">내 토큰:</span>
+          <span id="headerUserTokens" class="font-jua text-lg text-amber-400 transition-all duration-300">0P</span>
+        </div>
+
+        <div id="headerWonBadge" class="hidden items-center gap-1 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-400/50 px-3 py-1.5 rounded-2xl shadow-inner text-amber-300 text-xs font-bold">
+          <span id="headerWonIcon">👑</span>
+          <span id="headerWonName" class="font-black truncate max-w-[90px]">전리품</span>
+        </div>
+
+        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-2.5 py-1.5 rounded-xl text-xs">
+          <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_#f59e0b]" title="클라우드 동기화 상태"></span>
+          <input id="inputRoomCode" type="text" inputmode="numeric" maxlength="8" class="w-20 bg-slate-900 border border-slate-600 rounded px-1.5 text-[11px] font-black font-mono text-emerald-400 text-center focus:outline-none focus:border-emerald-500" placeholder="방코드" title="입장코드">
+        </div>
+
+        <button id="btnDownloadHtml" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-black shadow transition active:scale-95 flex items-center gap-1" title="현재 웹앱 HTML 파일 내려받기">
+          <i class="fa-solid fa-file-arrow-down text-sky-400"></i> HTML 저장
+        </button>
+
+        <button id="btnOpenTeacherAdmin" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-black shadow transition hover:scale-105">
+          교사 관리자 <span id="adminSubmittedBadge" class="bg-slate-900/50 text-[10px] px-1.5 py-0.2 rounded-full font-bold ml-0.5">0명</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 안전한 커스텀 토스트 알림창 (alert 대체) -->
+  <div id="appToast" class="fixed top-16 left-1/2 -translate-x-1/2 z-[100] hidden bg-slate-900/95 text-white px-5 py-2.5 rounded-2xl shadow-2xl border border-indigo-500/50 text-xs font-bold transition-all duration-300 flex items-center gap-2">
+    <span id="toastIcon">💡</span>
+    <span id="toastMsg">알림 메시지</span>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- [섹션 A] 본학습 화면 (가상실험실 + 퀴즈) -->
+  <!-- ========================================== -->
+  <section id="sectionMain" class="flex flex-col gap-4 flex-1 max-w-7xl mx-auto w-full p-3 sm:p-5">
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+      <button data-scene="beansSim" class="scene-tab p-3 rounded-2xl border-2 border-indigo-500 bg-indigo-50 text-indigo-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition active:scale-95 ring-2 ring-indigo-200">
+        <span class="text-xl">🫘</span> <span>놀이 1: 탄산음료 속 춤추는 콩 (15분 후 관찰)</span>
+      </button>
+      <button data-scene="balloonSim" class="scene-tab p-3 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition active:scale-95">
+        <span class="text-xl">🎈</span> <span>놀이 2: 헬륨 풍선과 빵끈 길이의 부력 균형</span>
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
+      
+      <!-- [모듈 2] 가상실험실 메인 뷰포트 -->
+      <div class="lg:col-span-7 bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-md flex flex-col justify-between relative overflow-hidden">
+        
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2">
+            <span id="sceneBadge" class="px-2.5 py-1 rounded-xl text-xs font-black bg-indigo-100 text-indigo-900 border border-indigo-200 flex items-center gap-1">
+              <span>🫘</span> 탄산음료와 이산화 탄소 기포
+            </span>
+            <span id="expStatusTag" class="text-xs font-black text-slate-500">콩을 넣고 기포의 부력을 관찰하세요</span>
+          </div>
+          <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-xl shadow-inner text-xs">
+            <span class="font-bold text-slate-500">실험 경과:</span>
+            <span id="labTimeMeter" class="font-black text-indigo-600 font-mono">0분 (탄산 풍부)</span>
+          </div>
+        </div>
+
+        <div id="stageViewport" class="relative my-3 min-h-[340px] flex flex-col items-center justify-center bg-gradient-to-b from-sky-50 via-slate-50 to-indigo-50 rounded-2xl border border-slate-200 p-4 overflow-hidden">
+          
+          <!-- [실험 1: 춤추는 콩] -->
+          <div id="sceneBeansView" class="relative flex flex-col items-center w-full z-20">
+            <div class="relative w-48 h-64 border-4 border-slate-400 bg-sky-100/40 rounded-b-3xl overflow-hidden shadow-2xl flex items-center justify-center">
+              <div class="absolute inset-x-0 bottom-0 top-8 bg-gradient-to-t from-amber-400/30 to-amber-200/20 backdrop-blur-[1px]"></div>
+              <div class="absolute inset-x-0 top-7 h-2 bg-white/60 border-b border-amber-300"></div>
+              <canvas id="beansCanvas" width="180" height="230" class="absolute inset-0 z-20"></canvas>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-center gap-2 mt-3 w-full">
+              <button id="btnAddBeans" class="px-4 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-xs font-black shadow transition active:scale-95 flex items-center gap-1.5">
+                <span>🫘</span> 콩 5알 더 넣기
+              </button>
+              <button id="btnFastForward15m" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black shadow transition active:scale-95 flex items-center gap-1.5">
+                <span>⏩</span> 15분 뒤 관찰하기 (기포 소멸)
+              </button>
+              <button id="btnResetSoda" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-black transition">
+                새 탄산음료 붓기 🔄
+              </button>
+            </div>
+          </div>
+
+          <!-- [실험 2: 헬륨 풍선과 빵끈 부력 균형] -->
+          <div id="sceneBalloonView" class="hidden relative flex flex-col items-center w-full z-20">
+            <div class="relative w-full max-w-sm h-64 border-2 border-dashed border-slate-300 bg-sky-50/60 rounded-2xl overflow-hidden flex flex-col justify-between p-2 shadow-inner">
+              <div class="text-[10px] font-bold text-slate-400 text-center border-b border-slate-200 pb-1">교실 천장 (너무 가벼우면 부딪힙니다)</div>
+              
+              <div class="relative flex-1 flex items-center justify-center">
+                <div id="targetFloatingZone" class="absolute w-full h-20 bg-emerald-100/60 border-y-2 border-emerald-400/80 flex items-center justify-end px-2">
+                  <span class="text-[11px] font-black text-emerald-700 bg-white/90 px-2 py-0.5 rounded-full shadow-sm">🎯 공중부양 평형 구간 (골디락스 존)</span>
+                </div>
+                
+                <div id="heliumBalloonObj" class="absolute flex flex-col items-center transition-all duration-700" style="bottom: 10px;">
+                  <div class="text-6xl filter drop-shadow-lg">🎈</div>
+                  <div id="balloonWire" class="w-1 bg-amber-700 rounded-full transition-all duration-300 -mt-1" style="height: 40px;"></div>
+                  <div class="text-[9px] font-black bg-amber-800 text-white px-1.5 py-0.2 rounded-full shadow-sm mt-0.5" id="wireLabel">10cm</div>
+                </div>
+              </div>
+
+              <div class="text-[10px] font-bold text-slate-400 text-center border-t border-slate-200 pt-1">바닥 (너무 무거우면 가라앉습니다)</div>
+            </div>
+
+            <div class="w-full max-w-sm mt-3 flex flex-col gap-2 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
+              <div class="flex items-center justify-between text-xs font-bold">
+                <span class="text-slate-600">빵끈 길이 조절: <b id="sliderWireVal" class="text-indigo-600 font-mono text-sm">10</b> cm</span>
+                <span id="balloonStatusResult" class="font-black text-slate-500">길이를 맞추고 시험해보세요</span>
+              </div>
+              <input id="wireLengthSlider" type="range" min="2" max="24" value="10" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+              <div class="flex justify-between text-[10px] text-slate-400 font-bold px-1">
+                <span>2cm (가벼움)</span>
+                <span>10~13cm (적정)</span>
+                <span>24cm (무거움)</span>
+              </div>
+              <button id="btnTestBuoyancy" class="mt-1 w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black shadow transition active:scale-95">
+                공중부양 균형 시험하기 🚀
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-sky-50 rounded-2xl p-3 border border-sky-200 flex flex-col gap-1 mt-1">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-sky-950 flex items-center gap-1.5">
+              <i class="fa-solid fa-lightbulb text-amber-500"></i> 기체 탐구 핵심 과학 원리:
+            </span>
+            <span class="text-[11px] font-black text-sky-800" id="principleSubTitle">이산화 탄소 기포와 부력</span>
+          </div>
+          <p class="text-[11px] text-slate-600 font-medium leading-relaxed" id="principleDesc">
+            탄산음료 속 <b>이산화 탄소 기포</b>가 콩 표면에 달라붙으면 부피가 커져 위로 뜨는 힘(부력)이 생깁니다. 15분 후 기포가 다 날아가면 콩은 다시 바닥으로 가라앉습니다.
+          </p>
+        </div>
+      </div>
+
+      <!-- [우측 5컬럼] 뽐내기 카드 및 퀴즈/경매 게이트 -->
+      <div class="lg:col-span-5 flex flex-col gap-4">
+        
+        <!-- 내 전리품 쇼케이스 (뽐내기 카드) -->
+        <div id="myTrophyShowcase" class="hidden bg-gradient-to-r from-amber-500/10 via-yellow-500/15 to-amber-500/10 border-2 border-amber-400 rounded-3xl p-4 shadow-lg gold-shimmer flex items-center gap-4">
+          <div id="trophyShowIcon" class="w-16 h-16 rounded-2xl bg-slate-900 border-2 border-amber-400 flex items-center justify-center text-3xl shadow-md">🏆</div>
+          <div class="flex-1">
+            <div class="flex items-center gap-1.5">
+              <span class="text-[10px] font-black bg-amber-500 text-slate-900 px-2 py-0.5 rounded-full">낙찰 성공!</span>
+              <span class="text-xs font-bold text-amber-600">나의 명예 전리품</span>
+            </div>
+            <h4 id="trophyShowTitle" class="text-base font-jua text-slate-900 mt-0.5">[아이템 이름]</h4>
+            <p id="trophyShowDesc" class="text-[11px] text-slate-600 font-medium mt-0.5">내가 획득한 한정판 칭호/아바타입니다.</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-md flex flex-col gap-3">
+          <h3 class="text-sm font-black text-slate-800 flex items-center gap-2 border-b pb-2">
+            <i class="fa-solid fa-flask-vial text-indigo-500"></i> 기체 놀이 탐구 정리
+          </h3>
+          <div class="text-xs text-slate-600 space-y-2 font-medium">
+            <p>✅ 탄산음료 속 기포(이산화 탄소)가 콩을 띄우는 원리는 <b>부력</b> 때문입니다.</p>
+            <p>✅ 공기보다 가벼운 <b>헬륨 가스</b>를 넣은 풍선은 위로 뜨지만, <b>빵끈의 무게</b>를 조절하면 공중에 알맞게 띄울 수 있습니다.</p>
+            <p>✅ 기체는 눈에 보이지 않아도 <b>공간을 차지하고 무게를 지니고</b> 있습니다.</p>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 rounded-3xl p-5 border-2 border-indigo-500 shadow-xl flex flex-col justify-between flex-1 relative overflow-hidden">
+          <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">🪙</div>
+          <div class="z-10">
+            <h3 class="text-base font-jua text-amber-400 mb-2 flex items-center gap-2">
+              <i class="fa-solid fa-coins"></i> 형성평가 4문항 풀고 토큰 채굴하기!
+            </h3>
+            <p class="text-xs text-slate-300 leading-relaxed font-bold mb-4">
+              선생님 신호에 맞춰 4문제를 연속으로 해결하세요.<br>
+              <span class="text-emerald-400">정답 1개당 +50P 토큰</span>이 지급됩니다.<br>
+              모은 토큰으로 이어지는 <b class="text-rose-400">실시간 토큰 경매장</b>에서 낙찰을 노려보세요!
+            </p>
+          </div>
+
+          <button id="btnOpenQuizGate" class="z-10 w-full py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-900 rounded-2xl font-black text-sm shadow-[0_0_15px_rgba(245,158,11,0.5)] transition active:scale-95 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-bolt"></i>
+            <span class="font-jua text-lg">퀴즈 &amp; 경매 대기실 입장하기</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- [섹션 B] 실시간 토큰 경매장 화면 -->
+  <!-- ========================================== -->
+  <section id="sectionAuctionRoom" class="hidden flex flex-col gap-4 flex-1 max-w-7xl mx-auto w-full p-3 sm:p-5">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1">
+      
+      <!-- 좌측 경매 현황 패널 -->
+      <div class="lg:col-span-7 bg-slate-800 rounded-3xl p-5 border border-indigo-900 shadow-2xl flex flex-col justify-between">
+        <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+          <span class="px-3 py-1 rounded-full text-xs font-black bg-rose-500/20 text-rose-400 border border-rose-500/40 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span> LIVE 라이브 경매
+          </span>
+          <div class="flex items-center gap-1.5 bg-slate-950 px-3.5 py-1.5 rounded-2xl border border-indigo-500/30 font-mono">
+            <i class="fa-regular fa-clock text-amber-400"></i>
+            <span id="auctionTimerText" class="text-base font-black text-white">대기 중</span>
+          </div>
+        </div>
+
+        <div class="my-4 p-5 rounded-3xl bg-slate-900 border border-indigo-500/40 flex flex-col sm:flex-row items-center gap-5">
+          <div id="auctionItemIcon" class="w-24 h-24 rounded-2xl bg-slate-950 border border-amber-400 flex items-center justify-center text-5xl shadow-[0_0_15px_rgba(251,191,36,0.3)]">🎁</div>
+          <div class="flex-1 text-center sm:text-left space-y-1">
+            <span id="auctionItemTypeTag" class="text-[10px] font-black bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 px-2 py-0.5 rounded-full">타입</span>
+            <h2 id="auctionItemTitle" class="text-2xl font-jua text-white mt-1">경매 대기중</h2>
+            <p id="auctionItemDesc" class="text-xs text-slate-400">선생님이 경매를 시작하면 출품작이 나타납니다.</p>
+            <div class="pt-2 text-xs text-slate-500">
+              시작가: <b id="auctionItemStartPrice" class="text-amber-400">- P</b>
+            </div>
+          </div>
+        </div>
+
+        <!-- 최고 입찰가 현황판 -->
+        <div class="bg-slate-950 border border-indigo-600/40 rounded-3xl p-5 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <span class="text-xs text-indigo-300 font-bold">현재 최고 입찰가</span>
+            <div class="flex items-baseline gap-1 mt-0.5">
+              <span id="auctionCurrentPrice" class="text-5xl font-black font-jua text-amber-400">0</span>
+              <span class="text-lg font-bold text-amber-300">P</span>
+            </div>
+          </div>
+          <div class="bg-indigo-900/40 px-5 py-3 rounded-2xl border border-indigo-500/30 text-right min-w-[140px]">
+            <span class="text-[11px] text-slate-400 font-bold">현재 1위 입찰자</span>
+            <div id="auctionTopBidder" class="text-lg font-black text-emerald-400 truncate max-w-[180px] mt-1">없음</div>
+          </div>
+        </div>
+
+        <!-- 입찰 버튼 그룹 -->
+        <div class="mt-4 pt-4 border-t border-slate-700 flex flex-col gap-2">
+          <div class="grid grid-cols-3 gap-2">
+            <button id="btnBidPlus20" class="py-3 rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 text-white font-jua text-sm transition active:scale-95 shadow-md disabled:opacity-50">+20P 입찰</button>
+            <button id="btnBidPlus50" class="py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 text-white font-jua text-sm transition active:scale-95 shadow-md disabled:opacity-50">+50P 입찰</button>
+            <button id="btnBidPlus100" class="py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 text-white font-jua text-sm transition active:scale-95 shadow-md disabled:opacity-50">+100P 입찰</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 우측 랭킹 및 피드 -->
+      <div class="lg:col-span-5 flex flex-col gap-4">
+        <div class="bg-slate-800 rounded-3xl p-4 border border-indigo-900 flex flex-col flex-1 shadow-lg">
+          <h3 class="text-sm font-jua text-amber-400 mb-3 border-b border-slate-700 pb-2 flex items-center justify-between">
+            <span>🏆 탐구 토큰 부자 랭킹</span> <i class="fa-solid fa-ranking-star"></i>
+          </h3>
+          <div id="tokenRankingList" class="flex-1 overflow-y-auto space-y-2 text-xs font-bold text-slate-300">
+            <div class="text-center text-slate-500 py-4">대기실 입장 대기중...</div>
+          </div>
+        </div>
+        <div class="bg-slate-800 rounded-3xl p-4 border border-indigo-900 flex flex-col h-[200px] shadow-lg">
+          <h3 class="text-sm font-jua text-slate-200 mb-3 border-b border-slate-700 pb-2">⚡ 실시간 호가 체결 피드</h3>
+          <div id="auctionFeedList" class="flex-1 overflow-y-auto space-y-2 text-xs font-medium text-slate-400 flex flex-col-reverse"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- [모달 팝업 세트] 게이트, 퀴즈, 관리자, 쇼케이스 -->
+  <!-- ========================================== -->
+
+  <!-- 1. 학생 대기실 입장 게이트 모달 -->
+  <div id="studentGateModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden flex flex-col">
+      <div class="bg-gradient-to-r from-amber-500 to-orange-500 p-4 text-center">
+        <h2 class="text-lg font-jua text-slate-900">🚀 퀴즈 &amp; 경매장 입장</h2>
+      </div>
+      <div class="p-5 flex flex-col gap-4">
+        <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">🔢 입장코드 (칠판 확인)</label>
+            <input id="gateRoomCode" type="text" inputmode="numeric" class="w-full px-3 py-2 bg-white rounded-xl border-2 border-amber-200 text-base font-black font-mono text-center focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">✏️ 닉네임 (실명 권장)</label>
+            <input id="gateStudentName" type="text" placeholder="예: 학생1" class="w-full px-3 py-2 bg-white rounded-xl border-2 border-slate-300 text-sm font-black text-center focus:outline-none">
+          </div>
+        </div>
+        <button id="btnGateEnter" class="w-full py-3 bg-slate-900 text-white rounded-xl font-jua text-base shadow-md hover:bg-slate-800 active:scale-95 transition">입장하기 ▶</button>
+        <button id="btnGateClose" class="w-full py-2 bg-slate-200 text-slate-600 rounded-xl font-bold text-xs hover:bg-slate-300">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 실시간 레이싱 퀴즈 모달 -->
+  <div id="quizContainerModal" class="hidden fixed inset-0 z-[60] bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col border border-slate-300">
+      <div id="quizWaitStep" class="p-8 flex flex-col items-center justify-center gap-4 text-center">
+        <div id="quizMyAvatar" class="text-6xl animate-bounce">🧑‍🎓</div>
+        <h3 id="quizWaitTitle" class="text-xl font-jua text-slate-800">대기실 입장 완료!</h3>
+        <p id="quizWaitDesc" class="text-sm text-slate-600 font-bold">선생님의 퀴즈 시작 신호를 기다립니다...</p>
+      </div>
+
+      <div id="quizContentStep" class="hidden p-5 flex flex-col gap-4">
+        <div class="flex items-center justify-between bg-indigo-50 border border-indigo-200 px-3 py-2 rounded-xl text-xs font-bold">
+          <span id="quizProgressTag" class="text-indigo-900 font-black">문제 1 / 4</span>
+          <div class="flex items-center gap-1.5 text-rose-600 font-black text-sm bg-white px-2 py-0.5 rounded-lg shadow-sm border border-rose-100">
+            <i class="fa-solid fa-stopwatch"></i> <span id="quizTimerText">30초</span>
+          </div>
+        </div>
+        <div>
+          <p id="quizQuestionText" class="text-sm sm:text-base font-black text-slate-800 leading-relaxed mb-4"></p>
+          <div id="quizOptionsList" class="flex flex-col gap-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 교사 관리자(Host) 관제 센터 모달 -->
+  <div id="adminContainerModal" class="hidden fixed inset-0 z-[70] bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
+    <div class="bg-slate-100 rounded-3xl w-full max-w-5xl max-h-[95vh] shadow-2xl overflow-hidden flex flex-col border border-slate-300">
+      
+      <div class="bg-slate-900 text-white p-3 flex items-center justify-between border-b border-slate-700">
+        <h2 class="text-sm font-jua flex items-center gap-2">
+          <i class="fa-solid fa-chalkboard-user"></i> 4학년 과학 [기체 놀이] 호스트 관제 센터
+        </h2>
+        <button id="btnCloseAdmin" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- 비밀번호 인증창 -->
+      <div id="adminAuthBox" class="p-8 flex flex-col items-center justify-center text-center gap-3">
+        <span class="text-4xl">🔐</span>
+        <h3 class="text-base font-black text-slate-800">교사 비밀번호 (기본: 1111)</h3>
+        <input id="adminPwInput" type="password" class="w-48 px-3 py-2 bg-white border border-slate-300 rounded-xl text-center focus:outline-none mt-2" placeholder="비밀번호 입력">
+        <button id="btnAdminVerify" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black mt-1 transition">인증 및 접속</button>
+      </div>
+
+      <!-- 관리자 메인 컨트롤 패널 -->
+      <div id="adminMainContent" class="hidden flex-1 overflow-y-auto flex flex-col">
+        
+        <!-- 룸코드 변경 및 퀴즈 컨트롤 툴바 -->
+        <div class="bg-white p-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4">
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-300">
+              <span class="text-xs font-bold text-slate-600">입장코드:</span>
+              <input id="adminCustomRoomCode" type="text" maxlength="8" class="w-20 px-2 py-0.5 bg-white border border-slate-400 rounded text-xs font-black font-mono text-center text-indigo-700 focus:outline-none">
+              <button id="btnAdminChangeCode" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded text-[11px] font-bold">적용</button>
+            </div>
+
+            <span class="text-xs font-bold text-slate-500">현재 입장: <span id="adminCurrentCount" class="text-indigo-600 text-base font-black">0</span>명</span>
+            
+            <button id="btnAdminActionQuiz" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-jua text-sm shadow transition active:scale-95 flex items-center gap-2">
+              <i class="fa-solid fa-play"></i> <span id="btnAdminActionQuizText">1라운드 퀴즈 시작</span>
+            </button>
+            
+            <button id="btnExportResult" class="hidden px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+              <i class="fa-solid fa-download"></i> 성적 TXT 다운로드 (최대 15명)
+            </button>
+          </div>
+        </div>
+
+        <!-- 실시간 출석부 및 문항별 정오표 -->
+        <div class="p-4 bg-slate-50 border-b border-slate-200">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-black text-slate-700 text-xs flex items-center gap-1.5">
+              <span>📋</span> 실시간 대기실 출석부 &amp; 문항별 정오표 (O/X)
+            </h3>
+            <span class="text-[11px] text-slate-500 font-bold">* 학생이 제출하면 즉시 ⭕/❌로 전환됩니다.</span>
+          </div>
+          <div id="adminLobbyListArea" class="bg-white rounded-2xl border border-slate-200 p-3 min-h-[120px] flex flex-wrap gap-2.5 shadow-inner"></div>
+        </div>
+
+        <!-- 퀴즈 레이싱 보드 -->
+        <div class="p-4 bg-slate-50">
+          <h3 class="font-black text-slate-700 text-xs mb-2">🏁 퀴즈 레이싱 제출 현황</h3>
+          <div id="adminBoardArea" class="bg-white rounded-2xl border border-slate-200 p-4 min-h-[140px] flex flex-wrap content-start gap-2 shadow-inner"></div>
+        </div>
+
+        <!-- 경매 진행 관제 -->
+        <div class="p-4 border-t-4 border-slate-200 bg-slate-800 text-white flex-1">
+          <h3 class="font-jua text-amber-400 text-lg mb-3">⚖️ 토큰 경매 진행 관제</h3>
+          <div class="flex flex-wrap gap-3 mb-4">
+            <select id="adminAuctionItemSelect" class="px-3 py-2 bg-slate-700 border border-slate-600 rounded-xl text-sm font-bold focus:outline-none"></select>
+            <select id="adminAuctionTimeSelect" class="px-3 py-2 bg-slate-700 border border-slate-600 rounded-xl text-sm font-bold focus:outline-none">
+              <option value="30">30초 경매</option>
+              <option value="60">60초 경매</option>
+            </select>
+            <button id="btnStartAuctionHost" class="px-6 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl font-jua shadow transition active:scale-95">
+              경매 시작하기 (모든 학생 화면 강제 전환)
+            </button>
+          </div>
+          
+          <div class="bg-slate-900 border border-slate-700 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4">
+             <div class="text-sm font-bold text-slate-300">현재 최고가: <span id="adminMonitorPrice" class="text-2xl text-amber-400 font-jua ml-2">0P</span></div>
+             <div class="text-sm font-bold text-slate-300">1위 입찰자: <span id="adminMonitorBidder" class="text-xl text-emerald-400 font-black ml-2">없음</span></div>
+             <div class="text-sm font-bold text-rose-400">남은 시간: <span id="adminMonitorTimer" class="text-2xl font-mono ml-2">0</span>초</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 낙찰 축하 쇼케이스 모달 -->
+  <div id="winShowcaseModal" class="hidden fixed inset-0 z-[80] bg-slate-950/90 flex items-center justify-center p-4">
+    <div class="bg-gradient-to-b from-amber-400 to-orange-500 rounded-3xl w-full max-w-sm p-1 shadow-[0_0_40px_rgba(251,191,36,0.6)] text-center animate-bounce">
+      <div class="bg-slate-900 rounded-[22px] p-8 flex flex-col items-center gap-4">
+        <h2 class="font-jua text-2xl text-white">🎉 낙찰을 축하합니다! 🎉</h2>
+        <div id="winItemIcon" class="text-7xl drop-shadow-xl my-3">🎁</div>
+        <div class="text-amber-400 font-black text-xl" id="winItemName">[아이템 명]</div>
+        <div class="bg-slate-800 px-4 py-2 rounded-xl border border-slate-700 w-full">
+          <span class="text-xs text-slate-400">최종 낙찰자</span><br>
+          <span id="winStudentName" class="text-xl font-jua text-emerald-400">학생이름</span>
+        </div>
+        <div class="bg-slate-800 px-4 py-2 rounded-xl border border-slate-700 w-full">
+          <span class="text-xs text-slate-400">최종 낙찰가</span><br>
+          <span id="winFinalPrice" class="text-2xl font-black text-amber-400 font-mono">0</span><span class="text-amber-400 font-bold"> P</span>
+        </div>
+        <button id="btnWinClose" class="mt-4 w-full py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-bold transition">닫기 및 본학습 복귀</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 자바스크립트 모듈 로직 -->
+  <!-- ========================================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, updateDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const QUIZ_LIST = [
+      {
+        question: "탄산음료에 콩이나 건포도를 넣었을 때 콩이 위로 떠오르는 까닭은 무엇일까요?",
+        options: ["콩이 녹아서 가벼워졌기 때문에", "이산화 탄소 기포가 콩에 달라붙어 부력이 생겼기 때문에", "음료수의 온도가 급격히 올라갔기 때문에", "음료수의 설탕이 콩을 밀어 올렸기 때문에"],
+        answer: 1,
+        reward: 50
+      },
+      {
+        question: "공기가 가득 찬 풍선의 특징으로 옳은 설명은 무엇일까요?",
+        options: ["손으로 눌러도 모양이 전혀 변하지 않는다.", "담는 풍선의 모양에 따라 기체의 모양이 변한다.", "공기는 공간을 차지하지 않는다.", "공기는 무게가 전혀 없다."],
+        answer: 1,
+        reward: 50
+      },
+      {
+        question: "헬륨 풍선에 빵끈(철사)을 매달아 교실 천장과 바닥 사이 공중에 알맞게 띄우려면 어떻게 해야 할까요?",
+        options: ["빵끈을 최대한 길고 무겁게 달아야 한다.", "빵끈을 완전히 떼어내야만 한다.", "풍선이 뜨는 힘과 빵끈의 무게가 평형을 이루도록 길이를 알맞게 조절한다.", "풍선에 찬물을 가득 채운다."],
+        answer: 2,
+        reward: 50
+      },
+      {
+        question: "우리 주변에서 기체를 이용하여 재미있게 놀이하거나 생활에 활용하는 예로 알맞지 않은 것은?",
+        options: ["튜브에 공기를 넣어 물놀이하기", "하늘 높이 띄우는 열기구 타기", "물속에서 숨을 쉬기 위해 공기통 사용하기", "비닐봉지에 모래를 가득 채워 멀리 던지기"],
+        answer: 3,
+        reward: 50
+      }
+    ];
+
+    const AUCTION_ITEMS = [
+      { id: "item1", type: "칭호", icon: "🫘", name: "[춤추는 콩 마스터]", desc: "이산화 탄소 부력의 비밀을 밝혀낸 탐구자", startPrice: 50 },
+      { id: "item2", type: "아바타", icon: "🎈", name: "[공중부양 풍선술사]", desc: "헬륨과 중력의 평형을 지배하는 연금술사", startPrice: 100 },
+      { id: "item3", type: "아이템", icon: "🧪", name: "[슈퍼 기체 캡슐]", desc: "신비한 기체를 보관하는 전설의 연구 캡슐", startPrice: 120 }
+    ];
+
+    const AVATARS = ['🎈','🪁','🦅','💨','🕊️','🚀','🐶','🐰','🦊','🐼'];
+    const initialRandomCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // 안전한 커스텀 토스트 함수 (alert 대체)
+    function showToast(msg, icon = '💡') {
+      const toast = document.getElementById('appToast');
+      if (!toast) return;
+      document.getElementById('toastIcon').textContent = icon;
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.remove('hidden');
+      toast.classList.add('flex');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        toast.classList.add('hidden');
+        toast.classList.remove('flex');
+      }, 2500);
+    }
+
+    const App = {
+      scene: 'beansSim',
+      roomCode: initialRandomCode,
+      activeStudent: null,
+      isHost: false,
+      roomState: null,
+      timerInterval: null,
+      auctionHostTimer: null,
+      isSubmitting: false,
+      beansFizzLevel: 100
+    };
+
+    const commChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('sci_gas_room_hub') : null;
+    function broadcastLocal(type, payload) {
+      const env = { type, roomCode: App.roomCode, payload, ts: Date.now() };
+      if (commChannel) commChannel.postMessage(env);
+      try { localStorage.setItem('sci_gas_local_event', JSON.stringify(env)); } catch(e){}
+    }
+
+    let db = null, auth = null, unsubscribeFirestore = null;
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'gas-science4-auction-app';
+
+    async function initFirebaseCloud() {
+      try {
+        if (typeof __firebase_config === 'undefined' || !__firebase_config) return false;
+        const app = initializeApp(typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        await signInAnonymously(auth);
+        return true;
+      } catch (e) {
+        document.getElementById('cloudStatusDot').className = "w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_#f43f5e]";
+        return false;
+      }
+    }
+
+    function getRoomRef(code) { return doc(db, 'artifacts', appId, 'public', 'data', 'rooms', String(code)); }
+
+    async function ensureRoomDoc(code) {
+      if (!db) return;
+      const ref = getRoomRef(code);
+      try {
+        const snap = await getDoc(ref);
+        if (!snap.exists()) {
+          await setDoc(ref, {
+            status: 'lobby',
+            currentRound: 0,
+            participants: {},
+            submissions: {},
+            auction: { active: false, itemIdx: 0, currentPrice: 0, topBidder: "", remainingSec: 0, winner: null }
+          }, { merge: true });
+        }
+      } catch(e) {
+        // 권한 에러 발생 시 로컬 릴레이 백업 작동
+        console.warn("Firestore 권한 지연/차단: 로컬 릴레이 모드로 안전 전환됩니다.");
+      }
+    }
+
+    function listenToRoom(code) {
+      if (!db) return;
+      if (unsubscribeFirestore) unsubscribeFirestore();
+      try {
+        unsubscribeFirestore = onSnapshot(getRoomRef(code), (docSnap) => {
+          if (docSnap.exists()) {
+            App.roomState = docSnap.data();
+            if (App.isHost) renderTeacherDashboard();
+            if (App.activeStudent) handleStudentStateChange();
+            renderTokenRanking();
+          }
+        }, (error) => {
+          // Uncaught Error in snapshot listener 원천 차단
+          console.warn("Firestore 구독 권한 오류 감지 -> 로컬 브로드캐스트 모드 유지:", error.code);
+          document.getElementById('cloudStatusDot').className = "w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_#f59e0b]";
+        });
+      } catch (err) {
+        console.warn("리스너 등록 실패:", err);
+      }
+    }
+
+    // --- [모듈 2] 가상실험실 로직 ---
+    document.querySelectorAll('.scene-tab').forEach(tab => {
+      tab.onclick = () => {
+        App.scene = tab.dataset.scene;
+        document.querySelectorAll('.scene-tab').forEach(t => t.className = "scene-tab p-3 rounded-2xl border border-slate-200 bg-white text-slate-700 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition active:scale-95");
+        tab.className = "scene-tab p-3 rounded-2xl border-2 border-indigo-500 bg-indigo-50 text-indigo-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition active:scale-95 ring-2 ring-indigo-200";
+
+        document.getElementById('sceneBeansView').classList.add('hidden');
+        document.getElementById('sceneBalloonView').classList.add('hidden');
+
+        if (App.scene === 'beansSim') {
+          document.getElementById('sceneBeansView').classList.remove('hidden');
+          document.getElementById('sceneBadge').innerHTML = "<span>🫘</span> 탄산음료와 이산화 탄소 기포";
+          document.getElementById('expStatusTag').textContent = "콩을 넣고 기포의 부력을 관찰하세요";
+          document.getElementById('principleSubTitle').textContent = "이산화 탄소 기포와 부력";
+          document.getElementById('principleDesc').innerHTML = "탄산음료 속 <b>이산화 탄소 기포</b>가 콩 표면에 달라붙으면 부피가 커져 위로 뜨는 힘(부력)이 생깁니다. 15분 후 기포가 다 날아가면 콩은 다시 바닥으로 가라앉습니다.";
+        } else {
+          document.getElementById('sceneBalloonView').classList.remove('hidden');
+          document.getElementById('sceneBadge').innerHTML = "<span>🎈</span> 헬륨 풍선과 빵끈 부력 균형";
+          document.getElementById('expStatusTag').textContent = "빵끈 길이를 조절하여 공중부양 골디락스 존을 찾아보세요";
+          document.getElementById('principleSubTitle').textContent = "기체의 밀도와 중력의 평형";
+          document.getElementById('principleDesc').innerHTML = "공기보다 가벼운 <b>헬륨 가스</b>의 부력과 <b>빵끈의 중력(무게)</b>이 완벽히 평형을 이루면 풍선이 천장이나 바닥에 닿지 않고 공중에 둥둥 뜨게 됩니다.";
+        }
+      };
+    });
+
+    const bCanvas = document.getElementById('beansCanvas');
+    const bCtx = bCanvas.getContext('2d');
+    let beansList = [
+      { x: 40, y: 190, vy: 0, bubbles: 0 },
+      { x: 90, y: 195, vy: 0, bubbles: 0 },
+      { x: 140, y: 188, vy: 0, bubbles: 0 }
+    ];
+    let tinyBubbles = [];
+
+    function animateBeans() {
+      bCtx.clearRect(0, 0, bCanvas.width, bCanvas.height);
+
+      if (App.beansFizzLevel > 0 && Math.random() < (App.beansFizzLevel / 100) * 0.8) {
+        tinyBubbles.push({
+          x: 10 + Math.random() * (bCanvas.width - 20),
+          y: bCanvas.height - 10,
+          r: 1 + Math.random() * 2.5,
+          vy: 1 + Math.random() * 2
+        });
+      }
+
+      tinyBubbles.forEach((tb, i) => {
+        tb.y -= tb.vy;
+        bCtx.beginPath();
+        bCtx.arc(tb.x, tb.y, tb.r, 0, Math.PI * 2);
+        bCtx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        bCtx.fill();
+        if (tb.y < 20) tinyBubbles.splice(i, 1);
+      });
+
+      beansList.forEach(bean => {
+        if (App.beansFizzLevel > 15) {
+          if (bean.y >= 185 && Math.random() < 0.03) {
+            bean.bubbles = 5 + Math.floor(Math.random() * 4);
+          }
+        } else {
+          bean.bubbles = 0;
+        }
+
+        if (bean.bubbles > 0) {
+          bean.vy = -1.2;
+          bean.y += bean.vy;
+          if (bean.y <= 35) {
+            bean.bubbles = 0;
+            bean.vy = 1.0;
+          }
+        } else {
+          if (bean.y < 190) {
+            bean.vy = 1.2;
+            bean.y += bean.vy;
+          } else {
+            bean.y = 190;
+            bean.vy = 0;
+          }
+        }
+
+        bCtx.beginPath();
+        bCtx.ellipse(bean.x, bean.y, 9, 6, Math.PI / 4, 0, Math.PI * 2);
+        bCtx.fillStyle = '#78350f';
+        bCtx.fill();
+        bCtx.strokeStyle = '#451a03';
+        bCtx.lineWidth = 1.5;
+        bCtx.stroke();
+
+        if (bean.bubbles > 0) {
+          for (let k = 0; k < bean.bubbles; k++) {
+            bCtx.beginPath();
+            bCtx.arc(bean.x - 6 + k * 3, bean.y - 4 + (k % 2) * 5, 2, 0, Math.PI * 2);
+            bCtx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            bCtx.fill();
+          }
+        }
+      });
+
+      requestAnimationFrame(animateBeans);
+    }
+    animateBeans();
+
+    document.getElementById('btnAddBeans').onclick = () => {
+      if (beansList.length >= 15) return showToast("비커가 가득 찼습니다! (최대 15알)", "⚠️");
+      for (let i = 0; i < 5; i++) {
+        beansList.push({
+          x: 20 + Math.random() * (bCanvas.width - 40),
+          y: 185 + Math.random() * 10,
+          vy: 0,
+          bubbles: 0
+        });
+      }
+    };
+
+    document.getElementById('btnFastForward15m').onclick = () => {
+      App.beansFizzLevel = 0;
+      document.getElementById('labTimeMeter').textContent = "15분 경과 (기포 완전히 소멸)";
+      document.getElementById('labTimeMeter').className = "font-black text-rose-600 font-mono";
+      document.getElementById('expStatusTag').textContent = "탄산이 모두 날아가 기포가 없어 콩이 바닥에 가라앉았습니다.";
+      beansList.forEach(b => b.bubbles = 0);
+    };
+
+    document.getElementById('btnResetSoda').onclick = () => {
+      App.beansFizzLevel = 100;
+      document.getElementById('labTimeMeter').textContent = "0분 (탄산 풍부)";
+      document.getElementById('labTimeMeter').className = "font-black text-indigo-600 font-mono";
+      document.getElementById('expStatusTag').textContent = "새 탄산음료를 부어 다시 콩이 춤을 춥니다!";
+      beansList = [
+        { x: 40, y: 190, vy: 0, bubbles: 0 },
+        { x: 90, y: 195, vy: 0, bubbles: 0 },
+        { x: 140, y: 188, vy: 0, bubbles: 0 }
+      ];
+    };
+
+    const slider = document.getElementById('wireLengthSlider');
+    const sliderVal = document.getElementById('sliderWireVal');
+    const balloonWire = document.getElementById('balloonWire');
+    const wireLabel = document.getElementById('wireLabel');
+    const balloonObj = document.getElementById('heliumBalloonObj');
+    const balloonStatus = document.getElementById('balloonStatusResult');
+
+    slider.oninput = (e) => {
+      const len = parseInt(e.target.value);
+      sliderVal.textContent = len;
+      balloonWire.style.height = `${len * 4}px`;
+      wireLabel.textContent = `${len}cm`;
+    };
+
+    document.getElementById('btnTestBuoyancy').onclick = () => {
+      const len = parseInt(slider.value);
+      if (len < 9) {
+        balloonObj.style.bottom = "175px";
+        balloonStatus.textContent = "실패: 너무 가벼워 천장에 쿵 부딪혔습니다!";
+        balloonStatus.className = "font-black text-rose-600";
+      } else if (len > 14) {
+        balloonObj.style.bottom = "10px";
+        balloonStatus.textContent = "실패: 너무 무거워 바닥으로 뚝 떨어졌습니다!";
+        balloonStatus.className = "font-black text-amber-600";
+      } else {
+        balloonObj.style.bottom = "85px";
+        balloonStatus.textContent = "🎉 성공! 헬륨 부력과 중력이 완벽히 균형을 이루었습니다!";
+        balloonStatus.className = "font-black text-emerald-600 font-bold";
+        if (typeof confetti === 'function') confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+      }
+    };
+
+    // --- 화면 탭 전환 ---
+    const navMain = document.getElementById('navTabMain');
+    const navAuction = document.getElementById('navTabAuction');
+    const secMain = document.getElementById('sectionMain');
+    const secAuction = document.getElementById('sectionAuctionRoom');
+
+    function switchToMain() {
+      navMain.className = "px-4 py-1.5 rounded-xl font-jua text-sm bg-indigo-600 text-white shadow transition";
+      navAuction.className = "px-4 py-1.5 rounded-xl font-jua text-sm text-slate-400 hover:text-white flex items-center gap-1.5 transition";
+      secMain.classList.remove('hidden');
+      secAuction.classList.add('hidden');
+    }
+    function switchToAuction() {
+      navAuction.className = "px-4 py-1.5 rounded-xl font-jua text-sm bg-rose-600 text-white shadow transition";
+      navMain.className = "px-4 py-1.5 rounded-xl font-jua text-sm text-slate-400 hover:text-white transition";
+      secMain.classList.add('hidden');
+      secAuction.classList.remove('hidden');
+    }
+    navMain.onclick = switchToMain;
+    navAuction.onclick = switchToAuction;
+
+    // --- [모듈 3 & 4] 학생 대기실 및 실시간 퀴즈 ---
+    document.getElementById('btnOpenQuizGate').onclick = () => {
+      document.getElementById('gateRoomCode').value = App.roomCode;
+      document.getElementById('studentGateModal').classList.remove('hidden');
+    };
+    document.getElementById('btnGateClose').onclick = () => {
+      document.getElementById('studentGateModal').classList.add('hidden');
+    };
+
+    document.getElementById('btnGateEnter').onclick = async () => {
+      const code = document.getElementById('gateRoomCode').value.trim();
+      const name = document.getElementById('gateStudentName').value.trim();
+      if (!code || !name) return showToast("입장코드와 이름을 입력해 주세요.", "⚠️");
+
+      await ensureRoomDoc(code);
+
+      let restoredLastRound = 0;
+      if (db) {
+        const snap = await getDoc(getRoomRef(code));
+        if (snap.exists() && snap.data().submissions) {
+          for (let i = 1; i <= QUIZ_LIST.length; i++) {
+            if (snap.data().submissions[i]?.[name]) restoredLastRound = i;
+          }
+        }
+      }
+
+      App.roomCode = code;
+      const avatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
+      App.activeStudent = { name, avatar, score: 0, time: 0, tokens: 0, lastRoundPlayed: restoredLastRound, items: [] };
+
+      if (db) {
+        try {
+          await updateDoc(getRoomRef(code), {
+            [`participants.${name}`]: { name, avatar, score: 0, totalTime: 0, tokens: 0, items: [] }
+          });
+        } catch(e){}
+      }
+
+      broadcastLocal('STUDENT_ENTER', { name, avatar });
+      listenToRoom(code);
+
+      document.getElementById('studentGateModal').classList.add('hidden');
+      document.getElementById('inputRoomCode').value = code;
+      document.getElementById('quizMyAvatar').textContent = avatar;
+      showQuizWait("대기실 입장 완료!", "선생님의 퀴즈 시작 신호를 기다립니다...");
+      document.getElementById('quizContainerModal').classList.remove('hidden');
+    };
+
+    function showQuizWait(title, desc) {
+      document.getElementById('quizWaitStep').classList.remove('hidden');
+      document.getElementById('quizContentStep').classList.add('hidden');
+      document.getElementById('quizWaitTitle').textContent = title;
+      document.getElementById('quizWaitDesc').textContent = desc;
+    }
+
+    function handleStudentStateChange() {
+      if (!App.roomState) return;
+      const { status, currentRound, auction, participants } = App.roomState;
+      const me = participants?.[App.activeStudent.name];
+
+      if (me) {
+        App.activeStudent.tokens = me.tokens;
+        document.getElementById('headerUserTokens').textContent = `${me.tokens}P`;
+
+        if (me.items && me.items.length > 0) {
+          const latestItem = me.items[me.items.length - 1];
+          document.getElementById('headerWonBadge').classList.remove('hidden');
+          document.getElementById('headerWonBadge').classList.add('flex');
+          document.getElementById('headerWonIcon').textContent = latestItem.icon;
+          document.getElementById('headerWonName').textContent = latestItem.name;
+
+          const showcase = document.getElementById('myTrophyShowcase');
+          showcase.classList.remove('hidden');
+          document.getElementById('trophyShowIcon').textContent = latestItem.icon;
+          document.getElementById('trophyShowTitle').textContent = latestItem.name;
+          document.getElementById('trophyShowDesc').textContent = latestItem.desc;
+        }
+      }
+
+      if (status === 'lobby') {
+        if (App.activeStudent.lastRoundPlayed > 0) {
+          showQuizWait("진행 대기 중", "퀴즈 완료! 선생님의 다음 지시(경매 등)를 기다립니다.");
+        } else {
+          showQuizWait("대기실 대기 중", "선생님의 신호를 기다립니다.");
+        }
+      } else if (status === 'quiz') {
+        if (currentRound > App.activeStudent.lastRoundPlayed) {
+          startStudentQuizRound(currentRound);
+        } else {
+          showQuizWait(`라운드 ${currentRound} 제출 완료!`, "다른 친구들이 풀기를 기다립니다...");
+        }
+      } else if (status === 'auction' && auction && auction.active) {
+        document.getElementById('quizContainerModal').classList.add('hidden');
+        document.getElementById('winShowcaseModal').classList.add('hidden');
+        switchToAuction();
+        syncAuctionView(auction);
+      } else if (status === 'auction_finished' && auction) {
+        if (document.getElementById('winShowcaseModal').classList.contains('hidden')) {
+          showWinShowcase(auction);
+        }
+      }
+    }
+
+    function startStudentQuizRound(roundNum) {
+      if (App.timerInterval) clearInterval(App.timerInterval);
+      App.isSubmitting = false;
+
+      document.getElementById('quizWaitStep').classList.add('hidden');
+      document.getElementById('quizContentStep').classList.remove('hidden');
+
+      const q = QUIZ_LIST[roundNum - 1];
+      document.getElementById('quizProgressTag').textContent = `라운드 ${roundNum} / ${QUIZ_LIST.length}`;
+      document.getElementById('quizQuestionText').textContent = `${roundNum}. ${q.question}`;
+
+      const list = document.getElementById('quizOptionsList');
+      list.innerHTML = '';
+
+      let roundStartTime = Date.now();
+      let timeLeft = 30;
+      const timerEl = document.getElementById('quizTimerText');
+      timerEl.textContent = "30초";
+
+      App.timerInterval = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = `${timeLeft}초`;
+        if (timeLeft <= 0) {
+          clearInterval(App.timerInterval);
+          App.timerInterval = null;
+          submitQuiz(roundNum, -1, 30.0, false, 0);
+        }
+      }, 1000);
+
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = "w-full text-left p-3 rounded-xl border border-slate-200 hover:bg-indigo-50 text-xs font-bold text-slate-700 transition active:scale-95";
+        btn.textContent = `${idx + 1}. ${opt}`;
+        btn.onclick = () => {
+          if (timeLeft <= 0 || App.isSubmitting) return;
+          clearInterval(App.timerInterval);
+          App.timerInterval = null;
+          const timeTaken = parseFloat(((Date.now() - roundStartTime) / 1000).toFixed(1));
+          const isCorrect = (idx === q.answer);
+          submitQuiz(roundNum, idx, timeTaken, isCorrect, q.reward);
+        };
+        list.appendChild(btn);
+      });
+    }
+
+    async function submitQuiz(roundNum, choiceIdx, timeTaken, isCorrect, rewardToken) {
+      if (App.isSubmitting) return;
+      App.isSubmitting = true;
+      App.activeStudent.lastRoundPlayed = roundNum;
+
+      const name = App.activeStudent.name;
+      const scoreAdd = isCorrect ? (100 / QUIZ_LIST.length) : 0;
+      const tokenAdd = isCorrect ? rewardToken : 0;
+
+      App.activeStudent.score = parseFloat((App.activeStudent.score + scoreAdd).toFixed(1));
+      App.activeStudent.time = parseFloat((App.activeStudent.time + timeTaken).toFixed(1));
+      App.activeStudent.tokens += tokenAdd;
+
+      if (db) {
+        try {
+          await updateDoc(getRoomRef(App.roomCode), {
+            [`submissions.${roundNum}.${name}`]: { choiceIdx, isCorrect, timeTaken },
+            [`participants.${name}.score`]: App.activeStudent.score,
+            [`participants.${name}.totalTime`]: App.activeStudent.time,
+            [`participants.${name}.tokens`]: App.activeStudent.tokens
+          });
+        } catch(e){}
+      }
+
+      broadcastLocal('STUDENT_SUBMIT', { roundNum, name, choiceIdx, isCorrect, timeTaken });
+      showQuizWait(`제출 완료!`, isCorrect ? `정답! +${rewardToken}P 획득 🪙` : "아쉽게도 오답입니다.");
+    }
+
+    // --- 경매 동기화 및 로직 ---
+    function syncAuctionView(auction) {
+      document.getElementById('auctionLiveBadge').classList.remove('hidden');
+      const item = AUCTION_ITEMS[auction.itemIdx];
+
+      document.getElementById('auctionItemIcon').textContent = item.icon;
+      document.getElementById('auctionItemTypeTag').textContent = item.type;
+      document.getElementById('auctionItemTitle').textContent = item.name;
+      document.getElementById('auctionItemDesc').textContent = item.desc;
+      document.getElementById('auctionItemStartPrice').textContent = `${item.startPrice}P`;
+      document.getElementById('auctionCurrentPrice').textContent = auction.currentPrice;
+      document.getElementById('auctionTopBidder').textContent = auction.topBidder || "없음";
+      document.getElementById('auctionTimerText').textContent = `${auction.remainingSec}초 남음`;
+
+      if (auction.remainingSec <= 5 && auction.remainingSec > 0) {
+        document.getElementById('auctionTimerText').classList.add('text-rose-400', 'animate-ping');
+      } else {
+        document.getElementById('auctionTimerText').classList.remove('text-rose-400', 'animate-ping');
+      }
+
+      const myTokens = App.activeStudent ? App.activeStudent.tokens : 0;
+      [20, 50, 100].forEach(val => {
+        const btn = document.getElementById(`btnBidPlus${val}`);
+        if (btn) btn.disabled = (myTokens < auction.currentPrice + val);
+      });
+    }
+
+    async function placeBid(increment) {
+      if (!App.roomState || !App.roomState.auction.active) return;
+      const { currentPrice, topBidder, remainingSec } = App.roomState.auction;
+      const newPrice = Number(currentPrice) + Number(increment);
+
+      if (App.activeStudent.tokens < newPrice) return showToast("보유 토큰이 부족합니다!", "🪙");
+      if (topBidder === App.activeStudent.name) return showToast("이미 최고 입찰자입니다!", "👑");
+
+      if (db) {
+        try {
+          const snap = await getDoc(getRoomRef(App.roomCode));
+          if (snap.exists() && snap.data().auction.currentPrice !== currentPrice) {
+            return showToast("앗! 다른 친구가 먼저 입찰했습니다. 가격을 확인하세요.", "⚡");
+          }
+
+          let newSec = remainingSec;
+          if (remainingSec <= 5 && remainingSec > 0) {
+            newSec += 10;
+            addFeedItem(`⏳ 마감 5초 전 입찰! 시간 +10초 연장!`);
+          }
+
+          await updateDoc(getRoomRef(App.roomCode), {
+            'auction.currentPrice': newPrice,
+            'auction.topBidder': App.activeStudent.name,
+            'auction.remainingSec': newSec
+          });
+          
+          broadcastLocal('AUCTION_BID', { price: newPrice, bidder: App.activeStudent.name, sec: newSec });
+          addFeedItem(`💸 ${App.activeStudent.name}님이 ${newPrice}P 입찰!`);
+        } catch(e){}
+      }
+    }
+
+    [20, 50, 100].forEach(val => {
+      document.getElementById(`btnBidPlus${val}`).onclick = () => placeBid(val);
+    });
+
+    function addFeedItem(msg) {
+      const feed = document.getElementById('auctionFeedList');
+      const div = document.createElement('div');
+      div.className = "bg-slate-700/60 p-2 rounded-lg border border-slate-600/50 text-[11px] text-slate-200";
+      div.textContent = msg;
+      feed.insertBefore(div, feed.firstChild);
+      if (feed.children.length > 8) feed.removeChild(feed.lastChild);
+    }
+
+    function renderTokenRanking() {
+      if (!App.roomState) return;
+      const pList = Object.values(App.roomState.participants || {}).sort((a,b) => b.tokens - a.tokens);
+      document.getElementById('tokenRankingList').innerHTML = pList.slice(0, 5).map((p, i) => `
+        <div class="flex items-center justify-between bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-600">
+          <div class="flex items-center gap-2">
+            <span class="${i===0?'text-amber-400':(i===1?'text-slate-300':'text-orange-400')} w-4 font-black">${i+1}</span>
+            <span>${p.avatar} ${p.name}</span>
+          </div>
+          <span class="text-amber-400 font-mono font-black">${p.tokens}P</span>
+        </div>
+      `).join('') || '<div class="text-center text-slate-500 py-4">데이터 없음</div>';
+    }
+
+    function showWinShowcase(auction) {
+      const item = AUCTION_ITEMS[auction.itemIdx];
+      document.getElementById('winItemIcon').textContent = item.icon;
+      document.getElementById('winItemName').textContent = item.name;
+      document.getElementById('winStudentName').textContent = auction.topBidder || "유찰";
+      document.getElementById('winFinalPrice').textContent = auction.currentPrice;
+      document.getElementById('winShowcaseModal').classList.remove('hidden');
+      if (typeof confetti === 'function') confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+    }
+    document.getElementById('btnWinClose').onclick = () => {
+      document.getElementById('winShowcaseModal').classList.add('hidden');
+      switchToMain();
+    };
+
+    // --- [모듈 5] 교사 관리자(Host) 제어 ---
+    document.getElementById('btnOpenTeacherAdmin').onclick = () => {
+      document.getElementById('adminPwInput').value = '';
+      document.getElementById('adminContainerModal').classList.remove('hidden');
+    };
+    document.getElementById('btnCloseAdmin').onclick = () => {
+      document.getElementById('adminContainerModal').classList.add('hidden');
+    };
+
+    document.getElementById('btnAdminVerify').onclick = () => {
+      if (document.getElementById('adminPwInput').value === '1111') {
+        App.isHost = true;
+        document.getElementById('adminAuthBox').classList.add('hidden');
+        document.getElementById('adminMainContent').classList.remove('hidden');
+        document.getElementById('adminCustomRoomCode').value = App.roomCode;
+        initHostRoom(App.roomCode);
+
+        const sel = document.getElementById('adminAuctionItemSelect');
+        sel.innerHTML = AUCTION_ITEMS.map((item, idx) => `<option value="${idx}">${item.icon} ${item.name}</option>`).join('');
+      } else {
+        showToast("비밀번호가 올바르지 않습니다. (기본: 1111)", "🔒");
+      }
+    };
+
+    document.getElementById('btnAdminChangeCode').onclick = async () => {
+      const newCode = document.getElementById('adminCustomRoomCode').value.trim();
+      if (!newCode) return showToast("새 입장코드를 입력하세요.", "⚠️");
+      App.roomCode = newCode;
+      document.getElementById('inputRoomCode').value = newCode;
+      await initHostRoom(newCode);
+      showToast(`입장코드가 [${newCode}]로 변경되었습니다.`, "✅");
+    };
+
+    document.getElementById('btnAdminChangeCode').onclick = async () => {
+      const newCode = document.getElementById('adminCustomRoomCode').value.trim();
+      if (!newCode) return alert("새 입장코드를 입력하세요.");
+      App.roomCode = newCode;
+      document.getElementById('inputRoomCode').value = newCode;
+      await initHostRoom(newCode);
+      alert(`입장코드가 [${newCode}]로 변경되었습니다.`);
+    };
+
+    async function initHostRoom(code) {
+      await ensureRoomDoc(code);
+      listenToRoom(code);
+    }
+
+    document.getElementById('btnAdminActionQuiz').onclick = async () => {
+      if (!App.roomState) return;
+      const { status, currentRound } = App.roomState;
+      const ref = getRoomRef(App.roomCode);
+      if (status === 'lobby' || status === 'auction_finished') {
+        await updateDoc(ref, { status: 'quiz', currentRound: 1 });
+      } else if (status === 'quiz') {
+        if (currentRound < QUIZ_LIST.length) {
+          await updateDoc(ref, { currentRound: currentRound + 1 });
+        } else {
+          await updateDoc(ref, { status: 'lobby' });
+        }
+      }
+    };
+
+    document.getElementById('btnStartAuctionHost').onclick = async () => {
+      const idx = parseInt(document.getElementById('adminAuctionItemSelect').value);
+      const timeSec = parseInt(document.getElementById('adminAuctionTimeSelect').value);
+      const item = AUCTION_ITEMS[idx];
+      const ref = getRoomRef(App.roomCode);
+
+      await updateDoc(ref, {
+        status: 'auction',
+        auction: { active: true, itemIdx: idx, currentPrice: item.startPrice, topBidder: "", remainingSec: timeSec, winner: null }
+      });
+
+      if (App.auctionHostTimer) clearInterval(App.auctionHostTimer);
+
+      App.auctionHostTimer = setInterval(async () => {
+        const snap = await getDoc(ref);
+        if (!snap.exists()) return;
+        const curAuction = snap.data().auction;
+        if (!curAuction || !curAuction.active) return clearInterval(App.auctionHostTimer);
+
+        let sec = curAuction.remainingSec - 1;
+        if (sec <= 0) {
+          clearInterval(App.auctionHostTimer);
+          await updateDoc(ref, {
+            status: 'auction_finished',
+            'auction.active': false,
+            'auction.remainingSec': 0,
+            'auction.winner': curAuction.topBidder
+          });
+
+          if (curAuction.topBidder) {
+            const winnerData = snap.data().participants[curAuction.topBidder];
+            const updatedItems = [...(winnerData.items || []), item];
+            await updateDoc(ref, {
+              [`participants.${curAuction.topBidder}.tokens`]: Math.max(0, winnerData.tokens - curAuction.currentPrice),
+              [`participants.${curAuction.topBidder}.items`]: updatedItems
+            });
+          }
+        } else {
+          await updateDoc(ref, { 'auction.remainingSec': sec });
+        }
+      }, 1000);
+    };
+
+    function renderTeacherDashboard() {
+      if (!App.roomState) return;
+      const { status, currentRound, participants, submissions, auction } = App.roomState;
+      const pList = Object.values(participants || {});
+
+      document.getElementById('adminCurrentCount').textContent = pList.length;
+      document.getElementById('adminSubmittedBadge').textContent = `${pList.length}명`;
+
+      const btnQuizText = document.getElementById('btnAdminActionQuizText');
+      if (status === 'lobby') btnQuizText.textContent = "1라운드 퀴즈 시작 ▶";
+      else if (status === 'quiz') btnQuizText.textContent = currentRound < QUIZ_LIST.length ? `다음 ${currentRound + 1}라운드 ▶` : `퀴즈 완료 (종료)`;
+
+      const lobbyArea = document.getElementById('adminLobbyListArea');
+      lobbyArea.innerHTML = '';
+      if (pList.length === 0) {
+        lobbyArea.innerHTML = `<div class="text-xs text-slate-400 py-3 text-center w-full">대기실에 접속한 학생이 없습니다.</div>`;
+      } else {
+        pList.forEach(p => {
+          let oxText = "";
+          for (let r = 1; r <= QUIZ_LIST.length; r++) {
+            const sub = submissions?.[r]?.[p.name];
+            if (!sub) oxText += `<span class="text-slate-400 font-mono">Q${r}:- </span>`;
+            else oxText += sub.isCorrect ? `<span class="text-emerald-600 font-bold font-mono">Q${r}:⭕ </span>` : `<span class="text-rose-500 font-bold font-mono">Q${r}:❌ </span>`;
+          }
+
+          const chip = document.createElement('div');
+          chip.className = "flex items-center gap-2 bg-slate-50 border border-slate-300 px-3 py-2 rounded-xl shadow-sm";
+          chip.innerHTML = `
+            <span class="text-2xl">${p.avatar}</span>
+            <div class="flex flex-col">
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-black text-slate-800">${p.name}</span>
+                <span class="text-[10px] font-bold text-amber-600 bg-amber-100 px-1.5 py-0.2 rounded">${p.tokens}P</span>
+              </div>
+              <div class="text-[10px] mt-0.5">${oxText}</div>
+            </div>
+          `;
+          lobbyArea.appendChild(chip);
+        });
+      }
+
+      const board = document.getElementById('adminBoardArea');
+      board.innerHTML = '';
+      pList.forEach(p => {
+        const div = document.createElement('div');
+        div.className = "p-2 border rounded-xl flex flex-col items-center w-20 shadow-sm transition-all";
+        div.innerHTML = `
+          <span class="text-2xl">${p.avatar}</span>
+          <span class="text-[10px] font-black mt-1 truncate w-full text-center">${p.name}</span>
+          <span class="text-[9px] text-amber-500 font-bold">${p.tokens}P</span>
+        `;
+        if (status === 'quiz' && submissions?.[currentRound]?.[p.name]) {
+          div.classList.add('bg-emerald-100', 'border-emerald-400');
+        } else {
+          div.classList.add('bg-slate-50', 'border-slate-200');
+        }
+        board.appendChild(div);
+      });
+
+      if (auction) {
+        document.getElementById('adminMonitorPrice').textContent = `${auction.currentPrice}P`;
+        document.getElementById('adminMonitorBidder').textContent = auction.topBidder || "없음";
+        document.getElementById('adminMonitorTimer').textContent = auction.remainingSec;
+      }
+
+      if (status === 'auction_finished' || status === 'lobby') {
+        document.getElementById('btnExportResult').classList.remove('hidden');
+      } else {
+        document.getElementById('btnExportResult').classList.add('hidden');
+      }
+    }
+
+    // 모듈 6: UTF-8 BOM 인코딩 적용된 성적 TXT 다운로드
+    document.getElementById('btnExportResult').onclick = () => {
+      if (!App.roomState) return;
+      const pList = Object.values(App.roomState.participants || {});
+      if (pList.length === 0) return showToast("출력할 학생 데이터가 없습니다.", "📁");
+
+      let txt = "\uFEFF";
+      txt += "========================================================\n";
+      txt += `  4학년 2학기 과학 [기체 놀이] 최종 성적 & 토큰 리포트\n`;
+      txt += `  입장코드: ${App.roomCode} | 출력 시각: ${new Date().toLocaleString()}\n`;
+      txt += "========================================================\n\n";
+
+      const top15 = pList.sort((a, b) => b.score - a.score || a.totalTime - b.totalTime).slice(0, 15);
+
+      top15.forEach((p, idx) => {
+        let oxBreakdown = "";
+        for (let r = 1; r <= QUIZ_LIST.length; r++) {
+          const sub = App.roomState.submissions?.[r]?.[p.name];
+          if (!sub) oxBreakdown += `[Q${r}: 미응답] `;
+          else oxBreakdown += sub.isCorrect ? `[Q${r}: ⭕(${sub.timeTaken}s)] ` : `[Q${r}: ❌(${sub.timeTaken}s)] `;
+        }
+        const wonItems = (p.items || []).map(i => i.name).join(', ') || "없음";
+
+        txt += `[${idx + 1}위] ${p.name} (${p.avatar})\n`;
+        txt += ` - 획득 점수: ${Math.round(p.score)}점 | 총 소요시간: ${p.totalTime.toFixed(1)}초\n`;
+        txt += ` - 잔여 토큰: ${p.tokens}P | 낙찰 전리품: ${wonItems}\n`;
+        txt += ` - 문항별 정오표: ${oxBreakdown}\n`;
+        txt += "--------------------------------------------------------\n";
+      });
+
+      const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `4학년_과학_기체놀이_성적리포트_${App.roomCode}.txt`;
+      a.click();
+    };
+
+    document.getElementById('btnDownloadHtml').onclick = () => {
+      const fullHtml = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `4학년2학기_과학_기체놀이_실시간경매_평가시스템_${App.roomCode}.html`;
+      a.click();
+    };
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      document.getElementById('inputRoomCode').value = App.roomCode;
+      await initFirebaseCloud();
+      listenToRoom(App.roomCode);
+    });
+  </script>
+
+</body></html>
